@@ -1,0 +1,91 @@
+问题描述：
+我们第一次提交了一份文件并push过去，这份文件并没有merge到master主分支。
+这个时候我们发现情况不对，代码还有错误，于是我们又修改了代码，push了上去。
+这时，网页端就有了两份代码，多余，删掉第一次那个错的。
+管理员审阅了第二份代码并给了2分，可以Submit到主分支了。
+但是，Submit时，问题发生了 :
+Submit including parents
+                           (This change depends on other changes which are not ready)
+
+想必大家已经知晓了为甚么发生了问题了。具体原因见下文（二 1）
+
+（一）如何解决
+1. 远端克隆数据库
+这里我们ls一下，是看不到Submit失败的文件的
+2. 为了不给master增加负担，我们可以选择新建一个分支【相关命令见（二 2）】；
+  但是，我们默认给他增增负。
+3. 将问题代码Cherry Pick{网页端--问题代码页面--右上角Download--Cherry Pick--复制到目标分支}
+[]# git checkout 目标分支名   //切换到目标分支
+[]# 复制的那句话糊上
+4. 查看冲突
+[]# git status 或 git log
+5.  解决冲突
+几种方法，（1）我们以新的提交对象重新提交{可以选择拉取新的分支提交}
+               []# git commit -s //这里我们可以看一下产生冲突的ID与对应文件
+                （2）我们去网页端找到问题代码依赖的上一次提交并恢复他
+这个地方举个例子：
+假设问题代码是 shangban.c
+我们Cherry Pick后就能查看shangban.c的状态信息了，我直接 
+[]# cp shangban.c bushangban.c
+[]# git add .
+[]# git commit .
+OK ，这是一种解决办法
+6.  []# git push origin HEAD:refs/for/master // 这里会以全新的文件推过去，所以需要重新打分
+
+（二）为什么会有这个问题呢？（看心情理解）
+1. 
+情景：manpan_revise-1.c是问题文件，muyoushuoming是被丢弃的Parents提交
+<
+manpan_revise-1.c
+/*Change-Id: Ie2f22281cbfaa3242c750f50aa5f8126d7b59812
+Author	
+zyz <1962458429@qq.com>
+Apr 13, 2021 3:42 PM
+Committer	
+zyz <1962458429@qq.com>
+Apr 21, 2021 5:01 PM */
+Commit	
+981db31548ea2c4ec8ffcfe2b8014c3dd9bcb647
+Parent(s)	
+84cb7894848861f258aea8a906e1458f784b6ad1
+Change-Id	
+Ie2f22281cbfaa3242c750f50aa5f8126d7b59812 
+>
+<
+muyoushuoming
+/*Change-Id: Id83d0c4a80aaa7304ab03de6daf9af2f420e1e93
+Author	
+zyz <1962458429@qq.com>
+Apr 13, 2021 2:29 PM
+Committer	
+zyz <1962458429@qq.com>
+Apr 13, 2021 2:29 PM */
+Commit	
+84cb7894848861f258aea8a906e1458f784b6ad1
+Parent(s)	
+691d99137276cdd432e498798fbdf35702ed6930
+Change-Id	
+Id83d0c4a80aaa7304ab03de6daf9af2f420e1e93
+>
+%% : manpan_revise-1为何merge不上去的原因找到了，它依赖的父Commit muyoushuoming被abandoned了
+2.
+[root@zyz TEST]# git fetch origin master:bug01 //创建新分支 bug01
+[root@zyz TEST]# ls .git/refs/heads/
+bug01  master
+[root@zyz TEST]# cat .git/refs/heads/bug01    // bug01 和 master的信息是完全一致的，为什么？
+8b31555243f2bd0aa67ac8451a4f2fbfe3ab631c
+[root@zyz TEST]# git cat-file -p 8b31555243f2bd0aa67ac8451a4f2fbfe3ab631c
+tree 94c5dd8243eab47f6585fd4eb32b97c3e329eb05
+parent db00e4914780342b4cda8db517267aba8674a2a8
+author jiademing <jiademing@estor.com.cn> 1618025283 +0800
+committer tengzhaoxia <tengzhaoxia@estor.com.cn> 1619086387 +0800
+
+hello
+
+Change-Id: I3f8dad3eade191b37c4f6a37a69dffd474b768f7
+Signed-off-by: jiademing <jiademing@estor.com.cn>
+[root@zyz TEST]# cat .git/refs/heads/master 
+8b31555243f2bd0aa67ac8451a4f2fbfe3ab631c
+[root@zyz TEST]# cat .git/HEAD
+ref: refs/heads/bug01         // 我将HEAD理解为一个指针，它用来指定我们的工作分支
+
