@@ -1,0 +1,5 @@
+将本文件夹中的   .vim文件夹 和 .vimrc 文件 复制到虚拟机下的/root/(家目录)
+
+颜色不合适，可参考以下连接配置，专家亲测此链接效果有偏差：
+
+https://blog.csdn.net/L19002S/article/details/103568911
