@@ -1,8 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =6
-let g:netrw_dirhist_1='/home/linux/20071/intnet'
-let g:netrw_dirhist_2='/home/linux/20071/lianxi/TCP'
-let g:netrw_dirhist_3='/home/linux/20071/projects'
-let g:netrw_dirhist_4='/home/linux/.vim/autoload'
-let g:netrw_dirhist_5='/home/linux/.vim/shell'
-let g:netrw_dirhist_6='/home/linux/.vim/snippets'
